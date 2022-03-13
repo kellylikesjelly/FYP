@@ -11,6 +11,9 @@ Original file is located at
 import streamlit as st
 
 import pandas as pd
+
+!pip install seaborn
+
 import seaborn as sns
 import numpy as np
 
