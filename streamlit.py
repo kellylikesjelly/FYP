@@ -90,15 +90,18 @@ competitor_df = pd.read_excel('https://github.com/kellylikesjelly/FYP/blob/main/
 
 competitor_df['Year'] = competitor_df['Year'].astype(str).str.split('.').str[0]
 
-plot= sns.lineplot(data = competitor_df, x='Year', y='Total Branches Open')
-st.pyplot(plot)
+fig, ax= pyplot.subplots()
+sns.lineplot(data = competitor_df, x='Year', y='Total Branches Open', ax=ax)
+st.pyplot(fig)
 
 #korean interest
 
 learn_korean_df = pd.read_excel('https://github.com/kellylikesjelly/FYP/blob/main/SGSearchLearnKorean%20(1).xlsx?raw=True', sheet_name='Cleaned')
 learn_korean_df['date']=pd.to_datetime(learn_korean_df['Month'])
-plot = sns.lineplot(data = learn_korean_df, x='date', y='Interest Relative to Peak (out of 100)')
-st.pyplot(plot)
+
+fig, ax= pyplot.subplots()
+sns.lineplot(data = learn_korean_df, x='date', y='Interest Relative to Peak (out of 100)', ax=ax)
+st.pyplot(fig)
 
 #covid government measures
 
@@ -111,18 +114,19 @@ covid_stringency_df['Date'] = pd.to_datetime(covid_stringency_df['Date'], format
 #get mean for each month
 covid_stringency_df = covid_stringency_df.groupby(pd.Grouper(key='Date', freq='1MS'))['StringencyIndex'].mean().to_frame()
 
-plot = sns.lineplot(data = covid_stringency_df, x='Date', y='StringencyIndex')
-st.pyplot(plot)
+fig, ax= pyplot.subplots()
+sns.lineplot(data = covid_stringency_df, x='Date', y='StringencyIndex', ax=ax)
+st.pyplot(fig)
 
-# #engineered feature -- online learning available?
+#engineered feature -- online learning available?
 
-# #according to excel online started in july
-# online_class_df = pd.DataFrame(pd.date_range(start='2020-04-01', end='2022-03-01', freq='1MS'))
+#according to excel online started in july
+online_class_df = pd.DataFrame(pd.date_range(start='2020-04-01', end='2022-03-01', freq='1MS'))
 
-# online_class_df['Online?']=1
+online_class_df['Online?']=1
 
-# online_class_df.columns=['Date', 'Online?']
-# online_class_df= online_class_df.set_index('Date')
+online_class_df.columns=['Date', 'Online?']
+online_class_df= online_class_df.set_index('Date')
 
 
 
@@ -139,313 +143,309 @@ st.pyplot(plot)
 # ! pip install ray[tune]
 # #maybe can just use normal pytorch early stopping inside
 
-# from ray import tune
-# from ray.tune import CLIReporter
-# from ray.tune.schedulers import ASHAScheduler
+from ray import tune
+from ray.tune import CLIReporter
+from ray.tune.schedulers import ASHAScheduler
 
-# import numpy as np
-# import matplotlib.pyplot as plt
-# import pandas as pd
-# import torch
-# import torch.nn as nn
-# from torch.autograd import Variable
-# from sklearn.preprocessing import MinMaxScaler
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+import torch
+import torch.nn as nn
+from torch.autograd import Variable
+from sklearn.preprocessing import MinMaxScaler
 
 # #aggregate to monthly - how many books need to be bought per month?
 
-# #B1+B2
-# B1_df = textbook_df.loc[textbook_df['LEVEL_EXTRACT_3'].isin(['B1', 'B2'])]
-# B1_monthly_df = B1_df.groupby(pd.Grouper(key = 'Registration_Date', freq = '1MS'))['Student Name'].count()
-# B1_monthly_df = B1_monthly_df.loc[(B1_monthly_df.index>'2010-01-01') & (B1_monthly_df.index<'2022-01-01')] #drop one wrongly entered year
-# #fill in the missing gaps with 0
-# date_range = pd.DataFrame(pd.date_range(start='1/1/2012', end='30/12/2021', freq = '1MS'), columns=['date'])
-# B1_monthly_df = date_range.merge(B1_monthly_df, how='left', left_on='date', right_on='Registration_Date')
-# B1_monthly_df = B1_monthly_df.fillna(0).set_index('date').iloc[:, 0]
-# sns.lineplot(data = B1_monthly_df, x= B1_monthly_df.index, y=B1_monthly_df.values)
+#B1+B2
+st.write('B1+B2')
+B1_df = textbook_df.loc[textbook_df['LEVEL_EXTRACT_3'].isin(['B1', 'B2'])]
+B1_monthly_df = B1_df.groupby(pd.Grouper(key = 'Registration_Date', freq = '1MS'))['Student Name'].count()
+B1_monthly_df = B1_monthly_df.loc[(B1_monthly_df.index>'2010-01-01') & (B1_monthly_df.index<'2022-01-01')] #drop one wrongly entered year
+#fill in the missing gaps with 0
+date_range = pd.DataFrame(pd.date_range(start='1/1/2012', end='30/12/2021', freq = '1MS'), columns=['date'])
+B1_monthly_df = date_range.merge(B1_monthly_df, how='left', left_on='date', right_on='Registration_Date')
+B1_monthly_df = B1_monthly_df.fillna(0).set_index('date').iloc[:, 0]
 
-# #only student count for now
-# B1_monthly_df = B1_monthly_df.to_frame('Student_Count')
+fig, ax= pyplot.subplots()
+sns.lineplot(data = B1_monthly_df, x= B1_monthly_df.index, y=B1_monthly_df.values, ax=ax)
+st.pyplot(fig)
 
-# # B1_monthly_df['dummy'] = range(len(B1_monthly_df))
+#only student count for now
+B1_monthly_df = B1_monthly_df.to_frame('Student_Count')
 
-# class MyDataset(torch.utils.data.Dataset):
-#     def __init__(self, data, window):
-#         self.data = data
-#         self.window = window
+# B1_monthly_df['dummy'] = range(len(B1_monthly_df))
 
-#     def __getitem__(self, index):
-#         x = self.data.iloc[index-self.window:index].values
-#         y = self.data.iloc[index]['Student_Count']
-#         return x, y
+class MyDataset(torch.utils.data.Dataset):
+    def __init__(self, data, window):
+        self.data = data
+        self.window = window
 
-#     def __len__(self):
-#         return len(self.data)
+    def __getitem__(self, index):
+        x = self.data.iloc[index-self.window:index].values
+        y = self.data.iloc[index]['Student_Count']
+        return x, y
 
-# # config = {
-# #     "LR": tune.loguniform(1e-3, 1e-2),
-# #     "hidden_size": tune.sample_from(lambda _: np.random.randint(2, 5)),
-# #     "num_layers": tune.choice([1]),
-# #     "seq_length": tune.sample_from(lambda _: np.random.randint(2, 6))
-# # }
+    def __len__(self):
+        return len(self.data)
 
-# config = {
-#     "LR": tune.loguniform(4e-3, 6e-3),
-#     "hidden_size": tune.sample_from(lambda _: np.random.randint(4, 6)),
-#     "num_layers": tune.choice([1, 2]),
-#     "seq_length": tune.sample_from(lambda _: np.random.randint(3, 5))
-# }
+config = {
+    "LR": tune.loguniform(4e-3, 6e-3),
+    "hidden_size": tune.sample_from(lambda _: np.random.randint(4, 6)),
+    "num_layers": tune.choice([1, 2]),
+    "seq_length": tune.sample_from(lambda _: np.random.randint(3, 5)),
+    "seed" : 42,
+}
 
-# train_size = len(B1_monthly_df)-6
-# #CHANGED FROM 75% OF DATASET!
+train_size = len(B1_monthly_df)-6
+#CHANGED FROM 75% OF DATASET!
 
-# B1_monthly_df_w_korean = B1_monthly_df.merge(learn_korean_df, on='date', how='left').drop(columns=['Month']).set_index('date')
+B1_monthly_df_w_korean = B1_monthly_df.merge(learn_korean_df, on='date', how='left').drop(columns=['Month']).set_index('date')
 
-# #merging datasets
+#merging datasets
 
-# B1_monthly_df_w_korean['Year'] = B1_monthly_df_w_korean.index.year
-# #only started korean in 2017
-# duolingo_df = duolingo_df.iloc[1:, :]
-# B1_monthly_df_w_korean_duo = B1_monthly_df_w_korean.merge(duolingo_df , how='left', on='Year')
-# B1_monthly_df_w_korean_duo['MAU (millions)'] = B1_monthly_df_w_korean_duo['MAU (millions)'].fillna(0)
+B1_monthly_df_w_korean['Year'] = B1_monthly_df_w_korean.index.year
+#only started korean in 2017
+duolingo_df = duolingo_df.iloc[1:, :]
+B1_monthly_df_w_korean_duo = B1_monthly_df_w_korean.merge(duolingo_df , how='left', on='Year')
+B1_monthly_df_w_korean_duo['MAU (millions)'] = B1_monthly_df_w_korean_duo['MAU (millions)'].fillna(0)
 
-# #merge competitors
-# competitor_df['Year'] = competitor_df['Year'].astype(int)
-# B1_monthly_df_w_korean_duo_compet = B1_monthly_df_w_korean_duo.merge(competitor_df, how='left', on='Year')
-# B1_monthly_df_w_korean_duo_compet.index = B1_monthly_df_w_korean.index
+#merge competitors
+competitor_df['Year'] = competitor_df['Year'].astype(int)
+B1_monthly_df_w_korean_duo_compet = B1_monthly_df_w_korean_duo.merge(competitor_df, how='left', on='Year')
+B1_monthly_df_w_korean_duo_compet.index = B1_monthly_df_w_korean.index
 
-# #merge covid stringency
-# B1_monthly_df_w_korean_duo_compet_stringency = B1_monthly_df_w_korean_duo_compet.merge(covid_stringency_df, how='left', left_index=True, right_on='Date').set_index('Date')
+#merge covid stringency
+B1_monthly_df_w_korean_duo_compet_stringency = B1_monthly_df_w_korean_duo_compet.merge(covid_stringency_df, how='left', left_index=True, right_on='Date').set_index('Date')
 
-# B1_monthly_df_w_korean_duo_compet_stringency['StringencyIndex'] = B1_monthly_df_w_korean_duo_compet_stringency['StringencyIndex'].fillna(0)
+B1_monthly_df_w_korean_duo_compet_stringency['StringencyIndex'] = B1_monthly_df_w_korean_duo_compet_stringency['StringencyIndex'].fillna(0)
 
-# B1_monthly_df_training = B1_monthly_df_w_korean_duo_compet_stringency.copy()
-# val_size = 4
+B1_monthly_df_training = B1_monthly_df_w_korean_duo_compet_stringency.copy()
+val_size = 4
 
-# B1_monthly_df_training = B1_monthly_df_training.drop(columns=['Year'])
+B1_monthly_df_training = B1_monthly_df_training.drop(columns=['Year'])
 
-# train_data = B1_monthly_df_training.iloc[:train_size-val_size]
+train_data = B1_monthly_df_training.iloc[:train_size-val_size]
 
-# #standardisation
+#standardisation
 
-# from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler
 
-# sc = StandardScaler()
-# #fit only on train data
-# scaler = sc.fit(train_data[train_data.columns])
+sc = StandardScaler()
+#fit only on train data
+scaler = sc.fit(train_data[train_data.columns])
 
-# #transform on entire dataset
-# B1_monthly_df_training[B1_monthly_df_training.columns] = scaler.transform(B1_monthly_df_training[B1_monthly_df_training.columns])
+#transform on entire dataset
+B1_monthly_df_training[B1_monthly_df_training.columns] = scaler.transform(B1_monthly_df_training[B1_monthly_df_training.columns])
 
 
 
-# #merge online class - dont standardise binary variable
-# B1_monthly_df_training = B1_monthly_df_training.merge(online_class_df, how='left', left_index=True, right_index=True)
-# B1_monthly_df_training['Online?'] = B1_monthly_df_training['Online?'].fillna(0)
+#merge online class - dont standardise binary variable
+B1_monthly_df_training = B1_monthly_df_training.merge(online_class_df, how='left', left_index=True, right_index=True)
+B1_monthly_df_training['Online?'] = B1_monthly_df_training['Online?'].fillna(0)
 
-# # val_data = B1_monthly_df_training.iloc[train_size-val_size:train_size]
+# val_data = B1_monthly_df_training.iloc[train_size-val_size:train_size]
 
-# #using another 6 months as validation might be okay
+#using another 6 months as validation might be okay
 
-# # train_data[train_data['StringencyIndex']!=0]
+# train_data[train_data['StringencyIndex']!=0]
 
-# # B1_monthly_df_training[60:88]
+# B1_monthly_df_training[60:88]
 
-# from torch.utils.data import Subset
-# from torch.utils.data import DataLoader
+from torch.utils.data import Subset
+from torch.utils.data import DataLoader
 
-# class LSTM(nn.Module):
+class LSTM(nn.Module):
 
-#     def __init__(self, num_classes, input_size, hidden_size, num_layers):
-#         super(LSTM, self).__init__()
+    def __init__(self, num_classes, input_size, hidden_size, num_layers):
+        super(LSTM, self).__init__()
         
-#         self.num_classes = num_classes
-#         self.num_layers = num_layers
-#         self.input_size = input_size
-#         self.hidden_size = hidden_size
+        self.num_classes = num_classes
+        self.num_layers = num_layers
+        self.input_size = input_size
+        self.hidden_size = hidden_size
         
-#         self.lstm = nn.LSTM(input_size=input_size, hidden_size=hidden_size,
-#                             num_layers=num_layers, batch_first=True)
+        self.lstm = nn.LSTM(input_size=input_size, hidden_size=hidden_size,
+                            num_layers=num_layers, batch_first=True)
         
-#         self.fc = nn.Linear(hidden_size, num_classes)
+        self.fc = nn.Linear(hidden_size, num_classes)
 
 
-#     def forward(self, x):
-#         # Propagate input through LSTM
-#         h_0 = Variable(torch.zeros(self.num_layers, x.size(0), self.hidden_size)).requires_grad_()
-#         c_0 = Variable(torch.zeros(self.num_layers, x.size(0), self.hidden_size)).requires_grad_()
+    def forward(self, x):
+        # Propagate input through LSTM
+        h_0 = Variable(torch.zeros(self.num_layers, x.size(0), self.hidden_size)).requires_grad_()
+        c_0 = Variable(torch.zeros(self.num_layers, x.size(0), self.hidden_size)).requires_grad_()
 
-#         ula, (h_out, _) = self.lstm(x, (h_0, c_0))
+        ula, (h_out, _) = self.lstm(x, (h_0, c_0))
 
-#         out = self.fc(h_out[0]).flatten()
+        out = self.fc(h_out[0]).flatten()
         
-#         return out
+        return out
 
-# # !cp 'drive/MyDrive/BA FYP/Data for Prediction/early_stopping_script.py' .
+# !cp 'drive/MyDrive/BA FYP/Data for Prediction/early_stopping_script.py' .
 
-# import os
+import os
 
-# # B1_monthly_df_training.iloc[int(train_size*0.67)-3: train_size]
+# B1_monthly_df_training.iloc[int(train_size*0.67)-3: train_size]
 
-# # import EarlyStopping from early_stopping_script.py
+# import EarlyStopping from early_stopping_script.py
 
-# #train should include the non zero values as well, check the inclusion!
+#train should include the non zero values as well, check the inclusion!
 
-# # df1 = B1_monthly_df_training.iloc[:int(len(B1_monthly_df_training)*0.95), :]
-# # df1.groupby('Online?').count()
+# df1 = B1_monthly_df_training.iloc[:int(len(B1_monthly_df_training)*0.95), :]
+# df1.groupby('Online?').count()
 
-# # B1_monthly_df_training.iloc[int(len(B1_monthly_df_training)*0.95):, :]
+# B1_monthly_df_training.iloc[int(len(B1_monthly_df_training)*0.95):, :]
 
-# # dataset = MyDataset(B1_monthly_df_training, 3)
-# # test_dataset = Subset(dataset, range(train_size, len(dataset)))
-# # testloader = DataLoader(test_dataset, batch_size=3, shuffle=False)
+# dataset = MyDataset(B1_monthly_df_training, 3)
+# test_dataset = Subset(dataset, range(train_size, len(dataset)))
+# testloader = DataLoader(test_dataset, batch_size=3, shuffle=False)
 
-# # iter_test = iter(testloader)
+# iter_test = iter(testloader)
 
-# # iter_test.next()
+# iter_test.next()
 
-# # B1_monthly_df_training[: train_size-val_size].groupby('Online?').count() #ok maybe val can be a bit smaller.
+# B1_monthly_df_training[: train_size-val_size].groupby('Online?').count() #ok maybe val can be a bit smaller.
 
-# def train_lstm(config, checkpoint_dir='drive/MyDrive/BA FYP/Data for Prediction', data_dir=None):
-#     #optimise value
-#     seq_length = config['seq_length']
-#     dataset = MyDataset(B1_monthly_df_training, seq_length)
+def train_lstm(config, checkpoint_dir='drive/MyDrive/BA FYP/Data for Prediction', data_dir=None):
+    #optimise value
+    seq_length = config['seq_length']
+    dataset = MyDataset(B1_monthly_df_training, seq_length)
 
-#     #start from window size onwards
+    #start from window size onwards
 
-#     train_dataset = Subset(dataset, range(config['seq_length'], train_size-val_size))
-#     val_dataset = Subset(dataset, range(train_size-val_size, train_size))
-#     test_dataset = Subset(dataset, range(train_size, len(dataset)))
+    train_dataset = Subset(dataset, range(config['seq_length'], train_size-val_size))
+    val_dataset = Subset(dataset, range(train_size-val_size, train_size))
+    test_dataset = Subset(dataset, range(train_size, len(dataset)))
 
-#     #use entire dataset for each batch
-#     trainloader = DataLoader(train_dataset, batch_size=3, shuffle=False)
-#     valloader = DataLoader(val_dataset, batch_size=3, shuffle=False)
-#     testloader = DataLoader(test_dataset, batch_size=3, shuffle=False)
+    #use entire dataset for each batch
+    trainloader = DataLoader(train_dataset, batch_size=3, shuffle=False)
+    valloader = DataLoader(val_dataset, batch_size=3, shuffle=False)
+    testloader = DataLoader(test_dataset, batch_size=3, shuffle=False)
 
 
-#     num_epochs = 40
-#     # learning_rate = 0.01
-#     learning_rate = config['LR']
+    num_epochs = 40
+    # learning_rate = 0.01
+    learning_rate = config['LR']
 
-#     input_size = 6 #RMBR TO CHANGE THIS! WHEN U ADD VARIABLES!
-#     hidden_size = config['hidden_size']
-#     num_layers = config['num_layers']
+    input_size = 6 #RMBR TO CHANGE THIS! WHEN U ADD VARIABLES!
+    hidden_size = config['hidden_size']
+    num_layers = config['num_layers']
 
-#     num_classes = 1
+    num_classes = 1
 
-#     # print(num_classes, input_size, hidden_size, num_layers)
+    # print(num_classes, input_size, hidden_size, num_layers)
 
-#     lstm = LSTM(num_classes, input_size, hidden_size, num_layers)
+    lstm = LSTM(num_classes, input_size, hidden_size, num_layers)
 
-#     criterion = torch.nn.MSELoss()    # mean-squared error for regression
-#     optimizer = torch.optim.Adam(lstm.parameters(), lr=learning_rate)
-#     #optimizer = torch.optim.SGD(lstm.parameters(), lr=learning_rate)
+    criterion = torch.nn.MSELoss()    # mean-squared error for regression
+    optimizer = torch.optim.Adam(lstm.parameters(), lr=learning_rate)
+    #optimizer = torch.optim.SGD(lstm.parameters(), lr=learning_rate)
 
-#     if checkpoint_dir:
-#         model_state, optimizer_state = torch.load(
-#             os.path.join(checkpoint_dir, "checkpoint"))
-#         lstm.load_state_dict(model_state)
-#         optimizer.load_state_dict(optimizer_state)
+    if checkpoint_dir:
+        model_state, optimizer_state = torch.load(
+            os.path.join(checkpoint_dir, "checkpoint"))
+        lstm.load_state_dict(model_state)
+        optimizer.load_state_dict(optimizer_state)
 
-#     # Train the model
-#     for epoch in range(num_epochs):
+    # Train the model
+    for epoch in range(num_epochs):
 
-#         #train phase
-#         lstm.train()
-#         optimizer.zero_grad()
+        #train phase
+        lstm.train()
+        optimizer.zero_grad()
 
-#         #get training x and y
-#         total_train_loss = 0
-#         train_steps = 0
-#         for i, batch in enumerate(trainloader):
-#           train_x, train_y = batch[0], batch[1]
-#           outputs = lstm(train_x.float())
+        #get training x and y
+        total_train_loss = 0
+        train_steps = 0
+        for i, batch in enumerate(trainloader):
+          train_x, train_y = batch[0], batch[1]
+          outputs = lstm(train_x.float())
 
-#           # print(i)
-#           # print('output', outputs) #CHECKING BUG
-#           # print('actual', train_y)
-#           # print('actual_float', train_y.float().size(), train_y.float())
-#           # print('squeeze o/p', np.squeeze(outputs))
+          # print(i)
+          # print('output', outputs) #CHECKING BUG
+          # print('actual', train_y)
+          # print('actual_float', train_y.float().size(), train_y.float())
+          # print('squeeze o/p', np.squeeze(outputs))
           
-#           # obtain the loss
-#           loss = criterion(outputs, train_y.float()) #remove squeeze op
-#           loss.backward()
+          # obtain the loss
+          loss = criterion(outputs, train_y.float()) #remove squeeze op
+          loss.backward()
           
-#           optimizer.step()
+          optimizer.step()
 
-#           total_train_loss +=loss.item()
-#           train_steps +=1
+          total_train_loss +=loss.item()
+          train_steps +=1
 
-#         #validation phase
-#         lstm.eval()
+        #validation phase
+        lstm.eval()
 
-#         #get validation data
-#         total_val_loss = 0
-#         val_steps = 0
-#         for i, batch in enumerate(valloader):
-#           val_x, val_y = batch[0], batch[1]
-#           outputs = lstm(val_x.float())
+        #get validation data
+        total_val_loss = 0
+        val_steps = 0
+        for i, batch in enumerate(valloader):
+          val_x, val_y = batch[0], batch[1]
+          outputs = lstm(val_x.float())
 
-#           # obtain the loss
-#           val_loss = criterion(outputs, val_y.float()).item() #removed squeeze
-#           total_val_loss +=val_loss
-#           val_steps+=1
+          # obtain the loss
+          val_loss = criterion(outputs, val_y.float()).item() #removed squeeze
+          total_val_loss +=val_loss
+          val_steps+=1
 
-#         if epoch % 100 == 0:
-#           print("Epoch: %d, train loss: %1.5f" % (epoch, total_train_loss/train_steps))
-#           print("Epoch: %d, validation loss: %1.5f" % (epoch, total_val_loss/val_steps))
+        if epoch % 100 == 0:
+          print("Epoch: %d, train loss: %1.5f" % (epoch, total_train_loss/train_steps))
+          print("Epoch: %d, validation loss: %1.5f" % (epoch, total_val_loss/val_steps))
 
 
-#         with tune.checkpoint_dir(epoch) as checkpoint_dir:
-#             path = os.path.join(checkpoint_dir, "checkpoint")
-#             torch.save((lstm.state_dict(), optimizer.state_dict()), path)
+        with tune.checkpoint_dir(epoch) as checkpoint_dir:
+            path = os.path.join(checkpoint_dir, "checkpoint")
+            torch.save((lstm.state_dict(), optimizer.state_dict()), path)
 
-#         avg_val_loss = total_val_loss/val_steps
-#         # print(avg_val_loss)
-#         tune.report(loss=avg_val_loss)
+        avg_val_loss = total_val_loss/val_steps
+        # print(avg_val_loss)
+        tune.report(loss=avg_val_loss)
 
-#     print("Finished Training")
+    print("Finished Training")
 
-# train_size-val_size
+def get_loaders(config):
+    #optimise value
+    seq_length = config['seq_length']
+    dataset = MyDataset(B1_monthly_df_training, seq_length)
 
-# def get_loaders(config):
-#     #optimise value
-#     seq_length = config['seq_length']
-#     dataset = MyDataset(B1_monthly_df_training, seq_length)
+    #start from window size onwards
 
-#     #start from window size onwards
+    train_dataset = Subset(dataset, range(seq_length, train_size-val_size))
+    val_dataset = Subset(dataset, range(train_size-val_size, train_size))
+    test_dataset = Subset(dataset, range(train_size, len(dataset)))
 
-#     train_dataset = Subset(dataset, range(seq_length, train_size-val_size))
-#     val_dataset = Subset(dataset, range(train_size-val_size, train_size))
-#     test_dataset = Subset(dataset, range(train_size, len(dataset)))
+    #use entire dataset for each batch
+    trainloader = DataLoader(train_dataset, batch_size=3, shuffle=False)
+    valloader = DataLoader(val_dataset, batch_size=3, shuffle=False)
+    testloader = DataLoader(test_dataset, batch_size=3, shuffle=False)
 
-#     #use entire dataset for each batch
-#     trainloader = DataLoader(train_dataset, batch_size=3, shuffle=False)
-#     valloader = DataLoader(val_dataset, batch_size=3, shuffle=False)
-#     testloader = DataLoader(test_dataset, batch_size=3, shuffle=False)
+    return trainloader, valloader, testloader, dataset
 
-#     return trainloader, valloader, testloader, dataset
+reporter = CLIReporter(
+        # parameter_columns=["l1", "l2", "lr", "batch_size"],
+        metric_columns=["loss", "training_iteration"])
 
-# reporter = CLIReporter(
-#         # parameter_columns=["l1", "l2", "lr", "batch_size"],
-#         metric_columns=["loss", "training_iteration"])
+analysis = tune.run(
+    train_lstm,
+    num_samples=5,
+    scheduler=ASHAScheduler(metric="loss", mode="min"),
+    config=config,
+    progress_reporter=reporter)
 
-# analysis = tune.run(
-#     train_lstm,
-#     num_samples=5,
-#     scheduler=ASHAScheduler(metric="loss", mode="min"),
-#     config=config,
-#     progress_reporter=reporter)
+#https://datascience.stackexchange.com/questions/36861/how-to-add-confidence-to-models-prediction
 
-# #https://datascience.stackexchange.com/questions/36861/how-to-add-confidence-to-models-prediction
+#ADD THIS CALCULATION IN!
 
-# #ADD THIS CALCULATION IN!
+# config={'LR': 0.005, 'hidden_size': 5, 'num_layers': 1, 'seq_length': 4}
 
-# # config={'LR': 0.005, 'hidden_size': 5, 'num_layers': 1, 'seq_length': 4}
-
-# best_trial = analysis.get_best_trial("loss", "min", "last")
-# print("Best trial config: {}".format(best_trial.config))
-# print("Best trial final validation loss: {}".format(
-#     best_trial.last_result["loss"]))
+best_trial = analysis.get_best_trial("loss", "min", "last")
+print("Best trial config: {}".format(best_trial.config))
+print("Best trial final validation loss: {}".format(
+    best_trial.last_result["loss"]))
 
 # #get best model
 
