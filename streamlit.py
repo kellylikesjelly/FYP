@@ -20,10 +20,7 @@ from gsheetsdb import connect
 import matplotlib.pyplot as pyplot
 import datetime
 
-gsheet_url = "https://docs.google.com/spreadsheets/d/13zqKByCKmAp4470U4audPRMtoRwo4APO/edit#gid=253062979"
-conn = connect()
-rows = conn.execute(f'SELECT * FROM "{gsheet_url}"')
-df = pd.DataFrame(rows)
+df = pd.read_excel('Copy of SECOND_MODEL_TRIAL (2).xlsx')
 
 textbook_df = df[['LEVEL_EXTRACT_3', 'Registration_Date', 'Textbook_Price', 'Student Name', 'Sheet', 'COMBINED_EXTRACTED_START_DATE']].copy()
 textbook_df = textbook_df.loc[textbook_df['Sheet']>2011]
