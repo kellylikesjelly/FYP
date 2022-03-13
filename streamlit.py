@@ -20,7 +20,7 @@ from gsheetsdb import connect
 import matplotlib.pyplot as pyplot
 import datetime
 
-gsheet_url = "https://docs.google.com/spreadsheets/d/13zqKByCKmAp4470U4audPRMtoRwo4APO/edit?usp=sharing&ouid=102921779133139539640&rtpof=true&sd=true"
+gsheet_url = "https://docs.google.com/spreadsheets/d/13zqKByCKmAp4470U4audPRMtoRwo4APO/edit#gid=253062979"
 conn = connect()
 rows = conn.execute(f'SELECT * FROM "{gsheet_url}"')
 df = pd.DataFrame(rows)
