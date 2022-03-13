@@ -9,7 +9,6 @@ Original file is located at
 
 """Import data ⚡"""
 import streamlit as st
-import matplotlib as plt
 
 import pandas as pd
 
@@ -80,7 +79,7 @@ duolingo_df = pd.read_excel('https://github.com/kellylikesjelly/FYP/blob/main/du
 
 duolingo_df = duolingo_df.iloc[:, :2]
 
-fig, ax= plt.subplots()
+fig, ax= pyplot.subplots()
 
 sns.lineplot(data = duolingo_df, x = 'Year', y='MAU (millions)', ax=ax)
 st.pyplot(fig)
