@@ -20,7 +20,7 @@ from gsheetsdb import connect
 import matplotlib.pyplot as pyplot
 import datetime
 
-df = pd.read_excel('Copy of SECOND_MODEL_TRIAL (2).xlsx')
+df = pd.read_excel('https://github.com/kellylikesjelly/FYP/blob/main/Copy%20of%20SECOND_MODEL_TRIAL%20(2).xlsx')
 
 textbook_df = df[['LEVEL_EXTRACT_3', 'Registration_Date', 'Textbook_Price', 'Student Name', 'Sheet', 'COMBINED_EXTRACTED_START_DATE']].copy()
 textbook_df = textbook_df.loc[textbook_df['Sheet']>2011]
