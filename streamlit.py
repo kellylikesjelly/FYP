@@ -9,6 +9,7 @@ Original file is located at
 
 """Import data ⚡"""
 import streamlit as st
+import matplotlib as plt
 
 import pandas as pd
 
