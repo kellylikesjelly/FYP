@@ -71,40 +71,46 @@ Import Additional Factors
 
 
 
-# #START HERE!!!!
+#START HERE!!!!
 
-# duolingo_df = pd.read_excel('/content/drive/My Drive/BA FYP/Data for Prediction/duolingo 2016-2021.xlsx')
+st.write('Duolingo Trend')
 
-# duolingo_df = duolingo_df.iloc[:, :2]
+duolingo_df = pd.read_excel('https://github.com/kellylikesjelly/FYP/blob/main/duolingo%202016-2021.xlsx?raw=True')
 
-# duolingo_df
+duolingo_df = duolingo_df.iloc[:, :2]
 
-# sns.lineplot(data = duolingo_df, x = 'Year', y='MAU (millions)')
+plot = sns.lineplot(data = duolingo_df, x = 'Year', y='MAU (millions)')
+st.pyplot(plot)
 
-# #competitor trend
+#competitor trend
 
-# competitor_df = pd.read_excel('/content/drive/My Drive/BA FYP/Data for Prediction/Korean School Competitor Numbers.xlsx', sheet_name='Cleaned')
+competitor_df = pd.read_excel('https://github.com/kellylikesjelly/FYP/blob/main/Korean%20School%20Competitor%20Numbers.xlsx?raw=True', sheet_name='Cleaned')
 
-# competitor_df['Year'] = competitor_df['Year'].astype(str).str.split('.').str[0]
+competitor_df['Year'] = competitor_df['Year'].astype(str).str.split('.').str[0]
 
-# sns.lineplot(data = competitor_df, x='Year', y='Total Branches Open')
+plot= sns.lineplot(data = competitor_df, x='Year', y='Total Branches Open')
+st.pyplot(plot)
 
-# #korean interest
+#korean interest
 
-# learn_korean_df = pd.read_excel('/content/drive/My Drive/BA FYP/Data for Prediction/SGSearchLearnKorean (1).xlsx', sheet_name='Cleaned')
-# learn_korean_df['date']=pd.to_datetime(learn_korean_df['Month'])
-# sns.lineplot(data = learn_korean_df, x='date', y='Interest Relative to Peak (out of 100)')
+learn_korean_df = pd.read_excel('https://github.com/kellylikesjelly/FYP/blob/main/SGSearchLearnKorean%20(1).xlsx?raw=True', sheet_name='Cleaned')
+learn_korean_df['date']=pd.to_datetime(learn_korean_df['Month'])
+plot = sns.lineplot(data = learn_korean_df, x='date', y='Interest Relative to Peak (out of 100)')
+st.pyplot(plot)
 
-# #covid government measures
+#covid government measures
 
-# covid_stringency_df = pd.read_csv('/content/drive/My Drive/BA FYP/Data for Prediction/covid_oxford.csv')
+covid_stringency_df = pd.read_csv('https://github.com/OxCGRT/covid-policy-tracker/blob/master/data/OxCGRT_latest_combined.csv?raw=True')
 
-# covid_stringency_df = covid_stringency_df[covid_stringency_df['CountryName']=='Singapore'][['Date','StringencyIndex']]
+covid_stringency_df = covid_stringency_df[covid_stringency_df['CountryName']=='Singapore'][['Date','StringencyIndex']]
 
-# covid_stringency_df['Date'] = pd.to_datetime(covid_stringency_df['Date'], format='%Y%m%d')
+covid_stringency_df['Date'] = pd.to_datetime(covid_stringency_df['Date'], format='%Y%m%d')
 
-# covid_stringency_df = covid_stringency_df.groupby(pd.Grouper(key='Date', freq='1MS'))['StringencyIndex'].mean().to_frame()
-# #get mean for each month
+#get mean for each month
+covid_stringency_df = covid_stringency_df.groupby(pd.Grouper(key='Date', freq='1MS'))['StringencyIndex'].mean().to_frame()
+
+plot = sns.lineplot(data = covid_stringency_df, x='Date', y='StringencyIndex')
+st.pyplot(plot)
 
 # #engineered feature -- online learning available?
 
