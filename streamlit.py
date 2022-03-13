@@ -42,14 +42,16 @@ B1_df_daily=B1_df.loc[(B1_df.index>'2010-01-01') & (B1_df.index<'2022-01-01')] #
 date_range = pd.DataFrame(pd.date_range(start='1/1/2012', end='30/12/2021'), columns=['date'])
 B1_df_daily = date_range.merge(B1_df_daily, how='left', left_on='date', right_on='Registration_Date')
 B1_df_daily = B1_df_daily.fillna(0).set_index('date').iloc[:, 0]
-st.pyplot(sns.lineplot(data = B1_df_daily, x= B1_df_daily.index, y=B1_df_daily.values))
+sns.lineplot(data = B1_df_daily, x= B1_df_daily.index, y=B1_df_daily.values)
+st.pyplot()
 
 #aggregate to annual (bulk purchase) - basically follows same trend as the class size
 
 B1_df = textbook_df.loc[textbook_df['LEVEL_EXTRACT_3'].isin(['B1','B2'])]
 B1_df = B1_df.groupby(pd.Grouper(key = 'Registration_Date', freq = '1AS'))['Student Name'].count()
 B1_df=B1_df.loc[(B1_df.index>'2010-01-01') & (B1_df.index<'2022-01-01')] #drop one wrongly entered year
-st.pyplot(sns.lineplot(data = B1_df, x= B1_df.index, y=B1_df.values))
+sns.lineplot(data = B1_df, x= B1_df.index, y=B1_df.values)
+st.pyplot()
 
 """LSTM Time! :)
 
