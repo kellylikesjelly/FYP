@@ -79,8 +79,10 @@ duolingo_df = pd.read_excel('https://github.com/kellylikesjelly/FYP/blob/main/du
 
 duolingo_df = duolingo_df.iloc[:, :2]
 
-plot = sns.lineplot(data = duolingo_df, x = 'Year', y='MAU (millions)')
-st.pyplot(plot)
+fig, ax= plt.subplots()
+
+sns.lineplot(data = duolingo_df, x = 'Year', y='MAU (millions)', ax=ax)
+st.pyplot(fig)
 
 #competitor trend
 
