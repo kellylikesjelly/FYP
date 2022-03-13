@@ -307,7 +307,7 @@ import os
 
 # B1_monthly_df_training[: train_size-val_size].groupby('Online?').count() #ok maybe val can be a bit smaller.
 
-def train_lstm(config, checkpoint_dir='drive/MyDrive/BA FYP/Data for Prediction', data_dir=None):
+def train_lstm(config, checkpoint_dir=None, data_dir=None):
     #optimise value
     seq_length = config['seq_length']
     dataset = MyDataset(B1_monthly_df_training, seq_length)
