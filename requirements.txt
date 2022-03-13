@@ -2,3 +2,6 @@ seaborn
 gsheetsdb
 matplotlib
 openpyxl
+ray[tune]
+torch
+sklearn
